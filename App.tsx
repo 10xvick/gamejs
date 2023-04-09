@@ -1,16 +1,20 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
+import { Jumpingjack } from './games/jumpingjack';
 import './style.css';
 
 export default function App() {
-
   return (
     <div>
-      <Games/>
+      <Games />
     </div>
   );
 }
+
+const gameclass = {
+  'Jumping Jack': Jumpingjack,
+};
 
 const games = [
   {
@@ -33,10 +37,11 @@ const games = [
 
 const Games = () => {
   const [selectedGame, setSelectedGame] = useState(null);
-
+  const canvas = useRef();
+  const HUD = useRef();
   const handleGameClick = (game) => {
-    console.log(game)
     setSelectedGame(game);
+    setTimeout(() => run(canvas.current, HUD.current, game), 0);
   };
 
   const handleBackClick = () => {
@@ -46,16 +51,29 @@ const Games = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-800 text-white">
       <header className="flex justify-center items-center h-4 bg-gray-900">
+        <span className="fw-bold">{selectedGame}</span>
       </header>
-      {selectedGame ? (<div className="flex flex-1 flex-col">
-        <canvas className="bg-gray-200 w-100"/>
-        <div className="bg-gray-300 text-center"> HUD </div>
+      {selectedGame ? (
+        <div className="flex flex-1 flex-col">
+          <canvas
+            ref={canvas}
+            className="bg-gray-200 w-100"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          <div ref={HUD} className="bg-green-400 text-center">
+            {' '}
+            HUD{' '}
+          </div>
         </div>
       ) : (
         <div className="flex-1 flex flex-wrap items-center justify-center overflow-y-auto">
-          {games.map((game) => (
-            <div className="bg-gray-900 m-1 p-5" key={game.name} onClick={handleGameClick} >
-              {game.name}
+          {games.map(({ name }) => (
+            <div
+              className="bg-gray-900 m-1 p-5"
+              key={name}
+              onClick={() => handleGameClick(name)}
+            >
+              {name}
             </div>
           ))}
         </div>
@@ -72,3 +90,13 @@ const Games = () => {
   );
 };
 
+function run(canvas, HUD, game) {
+  console.log(canvas, HUD, game);
+  new gameclass[game]({
+    element: canvas,
+    context: canvas.getContext('2d'),
+    width: 50,
+    height: 50,
+    HUD: HUD,
+  });
+}
