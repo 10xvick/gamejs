@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
 import { Jumpingjack } from './games/jumpingjack';
 import './style.css';
@@ -50,8 +50,9 @@ const Games = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-800 text-white">
-      <header className="flex justify-center items-center h-4 bg-gray-900">
-        <span className="fw-bold">{selectedGame}</span>
+      <header className="flex justify-center items-center h-6 bg-gray-900 font-bold text-gray-500">
+        JS arcade games collection
+        <span className="font-bold">{selectedGame}</span>
       </header>
       {selectedGame ? (
         <div className="flex flex-1 flex-col">
@@ -84,7 +85,7 @@ const Games = () => {
             <IoIosArrowBack size={24} />
           </button>
         )}
-        <p className="mx-auto text-gray-500">© 2023</p>
+        <p className="text-gray-500 text-sm">10xvick © 2023</p>
       </footer>
     </div>
   );
