@@ -62,7 +62,7 @@ const Games = () => {
             className="bg-gray-600 w-100"
             style={{ imageRendering: 'pixelated' }}
           />
-          <div ref={HUD} className="bg-green-400 text-center">
+          <div ref={HUD} className="bg-green-800 text-center">
             {' '}
             HUD{' '}
           </div>
