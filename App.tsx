@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useRef } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
 import { Jumpingjack } from './games/jumpingjack';
+import { unevenrunner } from './games/unevenrunner';
 import './style.css';
 
 export default function App() {
@@ -14,29 +15,11 @@ export default function App() {
 
 const gameclass = {
   'Jumping Jack': Jumpingjack,
+  'Uneven Runner': unevenrunner,
 };
 
-const games = [
-  {
-    name: 'Jumping Jack',
-    thumbnail: 'https://via.placeholder.com/150x150',
-  },
-  {
-    name: 'Game 2',
-    thumbnail: 'https://via.placeholder.com/150x150',
-  },
-  {
-    name: 'Game 3',
-    thumbnail: 'https://via.placeholder.com/150x150',
-  },
-  {
-    name: 'Game 4',
-    thumbnail: 'https://via.placeholder.com/150x150',
-  },
-];
-
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState();
+  const [selectedGame, setSelectedGame] = useState('');
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
@@ -72,7 +55,7 @@ const Games = () => {
         </div>
       ) : (
         <div className="flex-1 flex flex-wrap items-center justify-center overflow-y-auto">
-          {games.map(({ name }) => (
+          {Object.keys(gameclass).map((name) => (
             <div
               className="bg-gray-900 m-1 p-5"
               key={name}
