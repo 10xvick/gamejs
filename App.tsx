@@ -36,7 +36,7 @@ const games = [
 ];
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState('Jumping Jack');
+  const [selectedGame, setSelectedGame] = useState();
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
@@ -48,7 +48,7 @@ const Games = () => {
   };
 
   React.useEffect(() => {
-    run(canvas.current, HUD.current, selectedGame);
+    selectedGame && run(canvas.current, HUD.current, selectedGame);
   }, [selectedGame]);
 
   return (
