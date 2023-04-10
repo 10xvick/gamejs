@@ -1,9 +1,6 @@
 export class Jumpingjack {
-  gobj: gameobjects;
-  logic: logics;
-
-  constructor(canvas_) {
-    this.logic = new logics(new gameobjects(canvas_));
+  constructor(canvas) {
+    new logics(new gameobjects(canvas));
   }
 }
 
@@ -141,13 +138,7 @@ class logics {
     const drawplayer = (player) => {
       player.pixels.forEach((rows, i) => {
         rows.forEach((pixel, j) => {
-          pixel &&
-            canvas.context.fillRect(
-              player.x + j,
-              player.y + i,
-              player.width,
-              player.height
-            );
+          pixel && canvas.context.fillRect(player.x + j, player.y + i, 1, 1);
         });
       });
     };
@@ -171,43 +162,31 @@ class gameobjects {
       this.canvas.width,
       this.canvas.height,
     ];
-    this.player.pixels = this.parser.topixels(this.player.pixelcode);
+    this.player.width = this.player.pixels[0].length;
+    this.player.height = this.player.pixels.length;
+    this.player.initialpos = {
+      x: this.canvas.width / 2 - this.player.width * 1.5,
+      y: this.canvas.height - this.player.height,
+    };
   }
 
   firstframe = 0;
 
   parser = {
-    topixels: (str) => {
-      const bin = str.split('').map((e) => e.charCodeAt().toString(2));
-      const maxlength = Math.max(...bin.map((e) => e.length));
-      const arr = bin.map((e) => {
-        const shift = maxlength - e.length;
-        return [
-          ...Array(shift).fill(0),
-          ...e.split('').map((f) => parseInt(f)),
-        ];
-      });
-      return arr;
-    },
-    togglepixcel: (bin) => {
-      return bin == 0 ? 1 : 0;
-    },
-    compareArray: (ar1, ar2) => {
-      return ar1.every((e, i) => e == ar2[i]);
-    },
     playerwalkanim: () => {
       const pix = this.player.pixels;
+      const height = this.player.pixels.length;
       if (this.firstframe > 10) {
         this.firstframe = 0;
       }
       this.firstframe++;
 
       if (this.firstframe < 5) {
-        pix[8] = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0];
-        pix[9] = [0, 1, 1, 0, 0, 0, 0, 1, 1, 0];
+        pix[height - 2] = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0];
+        pix[height - 1] = [0, 1, 1, 0, 0, 0, 0, 1, 1, 0];
       } else {
-        pix[8] = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
-        pix[9] = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0];
+        pix[height - 2] = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
+        pix[height - 1] = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0];
       }
     },
   };
@@ -222,13 +201,25 @@ class gameobjects {
     HUD: null,
   };
   player = {
-    initialpos: { x: 10, y: 40, width: 1, height: 1 },
+    initialpos: { x: 10, y: 40 },
     x: 10,
     y: 40,
     width: 1,
     height: 1,
-    pixels: [],
-    pixelcode: 'ǾǼǔǼƄϾϾǼĄƆ',
+    pixels: [
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 0, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+    ],
     actions: {
       jump: {
         limit: 15,

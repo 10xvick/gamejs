@@ -36,17 +36,20 @@ const games = [
 ];
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState(null);
+  const [selectedGame, setSelectedGame] = useState('Jumping Jack');
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
     setSelectedGame(game);
-    setTimeout(() => run(canvas.current, HUD.current, game), 0);
   };
 
   const handleBackClick = () => {
     setSelectedGame(null);
   };
+
+  React.useEffect(() => {
+    run(canvas.current, HUD.current, selectedGame);
+  }, [selectedGame]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-800 text-white">
@@ -93,7 +96,7 @@ const Games = () => {
 };
 
 function run(canvas, HUD, game) {
-  console.log(canvas, HUD, game);
+  console.log(gameclass, game);
   new gameclass[game]({
     element: canvas,
     context: canvas.getContext('2d'),
