@@ -90,7 +90,11 @@ class logics {
     },
     destroyandcreatenew: () => {
       this.gobject.obstacle.container.pop();
-      const height = this.utility.randomrange(10, 4);
+      const ht_range = this.gobject.obstacle.element.height;
+      const height = this.utility.randomrange(
+        ht_range,
+        ht_range - this.gobject.obstacle.element.heightDevience
+      );
       const obs = {
         x: this.utility.randomrange(70, 50),
         width: this.utility.randomrange(6, 1),
@@ -128,7 +132,7 @@ class logics {
     }
     obstacle.x -= 0.25;
     this.actions.jumpstate();
-    this.actions.hit();
+    // this.actions.hit();
     this.actions.gc();
     parser.playerwalkanim();
   }
@@ -196,8 +200,8 @@ class gameobjects {
     context: null,
     x: 0,
     y: 0,
-    width: 0,
-    height: 0,
+    width: 100,
+    height: 50,
     HUD: null,
   };
   player = {
@@ -235,8 +239,9 @@ class gameobjects {
     element: {
       x: 50,
       y: 45,
-      width: 5,
-      height: 5,
+      width: 1,
+      height: 3,
+      heightDevience: 2,
     },
   };
   game = {
