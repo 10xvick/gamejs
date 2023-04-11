@@ -143,9 +143,7 @@ class logics {
       });
     };
     drawplayer(player);
-    obstacle.container.forEach((e) =>
-      canvas.context.fillRect(e.x, e.y, e.width, e.height)
-    );
+    obstacle.container.forEach((e) => canvas.context.fillRect(e.x, e.y, 1, 1));
   }
 }
 
