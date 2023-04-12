@@ -18,7 +18,7 @@ class logics {
           .fill(1)
           .map((e, i) => ({
             x: gobject.canvas.width * i,
-            y: this.utility.randomrange(50, 45),
+            y: this.actions.newHeight(),
           })) as any;
         gobject.player.x = gobject.player.initialpos.x;
         gobject.player.y = gobject.player.initialpos.y;
@@ -51,6 +51,7 @@ class logics {
   actions = {
     jump: () => {
       const { player, obstacle } = this.gobject;
+      
       if (true) {
         player.y = obstacle.container[1].y - player.height;
         obstacle.container[0].y = obstacle.container[1].y;
@@ -66,6 +67,16 @@ class logics {
           player.actions.jump.done = true;
         }
       }
+    },
+    newHeight: () => {
+      return (
+        this.gobject.canvas.height -
+        this.gobject.player.actions.jump.step *
+          this.utility.randomrange(
+            this.gobject.obstacle.element.heightDevience,
+            1
+          )
+      );
     },
     hit: () => {
       const { player, obstacle } = this.gobject;
@@ -89,7 +100,7 @@ class logics {
         if (o.x < -1 * canvas.width) {
           const selection = obstacle.container.shift();
           selection.x = obstacle.container[0].x + canvas.width;
-          selection.y = this.utility.randomrange(48, 45);
+          selection.y = this.actions.newHeight();
           this.gobject.obstacle.container.push(selection);
           this.actions.updatespec(false);
           this.setupdatespeed();
@@ -221,6 +232,7 @@ class gameobjects {
         y: 0,
         limitreched: false,
         done: true,
+        step: 4,
       },
       damage: {},
     },
@@ -232,7 +244,7 @@ class gameobjects {
       y: 45,
       width: this.canvas.width,
       height: 1,
-      heightDevience: 2,
+      heightDevience: 4,
     },
   };
   game = {
