@@ -14,9 +14,12 @@ class logics {
         gobject.game.over = false;
         gobject.game.score = 0;
         gobject.game.speed = gobject.game.initialspeed;
-        gobject.obstacle.container = [
-          Object.assign({}, gobject.obstacle.element),
-        ];
+        gobject.obstacle.container = Array(2)
+          .fill(1)
+          .map((e, i) => ({
+            x: gobject.canvas.width * i,
+            y: this.utility.randomrange(50, 45),
+          })) as any;
         gobject.player.x = gobject.player.initialpos.x;
         gobject.player.y = gobject.player.initialpos.y;
         this.actions.updatespec(false);
@@ -47,10 +50,10 @@ class logics {
 
   actions = {
     jump: () => {
-      const { player } = this.gobject;
-      if (player.actions.jump.done) {
-        player.actions.jump.done = false;
-        player.actions.jump.y = -50;
+      const { player, obstacle } = this.gobject;
+      if (true) {
+        player.y = obstacle.container[1].y - player.height;
+        obstacle.container[0].y = obstacle.container[1].y;
       }
     },
     jumpstate: () => {
@@ -81,31 +84,19 @@ class logics {
       }
     },
     gc: () => {
-      const { obstacle } = this.gobject;
-      obstacle.container.forEach((o) => {
-        if (o.x < -o.width) {
-          this.actions.destroyandcreatenew();
+      const { obstacle, canvas } = this.gobject;
+      obstacle.container.forEach((o, i) => {
+        if (o.x < -1 * canvas.width) {
+          const selection = obstacle.container.shift();
+          selection.x = obstacle.container[0].x + canvas.width;
+          selection.y = this.utility.randomrange(48, 45);
+          this.gobject.obstacle.container.push(selection);
+          this.actions.updatespec(false);
+          this.setupdatespeed();
         } else o.x -= 0.5;
       });
     },
-    destroyandcreatenew: () => {
-      this.gobject.obstacle.container.pop();
-      const ht_range = this.gobject.obstacle.element.height;
-      const height = this.utility.randomrange(
-        ht_range,
-        ht_range - this.gobject.obstacle.element.heightDevience
-      );
-      const obs = {
-        x: this.utility.randomrange(70, 50),
-        width: this.utility.randomrange(6, 1),
-        height: height,
-        y: this.gobject.canvas.height - height,
-      };
-      this.gobject.obstacle.container.push(obs);
-      this.gobject.game.score += 1;
-      this.actions.updatespec(false);
-      this.setupdatespeed();
-    },
+
     updatespec: (gameover) => {
       if (gameover) {
         this.gobject.game.over = true;
@@ -148,7 +139,7 @@ class logics {
     };
     drawplayer(player);
     obstacle.container.forEach((e) =>
-      canvas.context.fillRect(e.x, e.y, e.width, e.height)
+      canvas.context.fillRect(e.x, e.y, canvas.width, canvas.height - e.y)
     );
   }
 }
@@ -212,9 +203,9 @@ class gameobjects {
     height: 1,
     pixels: [
       [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
       [0, 0, 1, 1, 1, 1, 0, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -235,19 +226,19 @@ class gameobjects {
     },
   };
   obstacle = {
-    container: [{ x: 50, y: 45, width: 10, height: 5 }],
+    container: [],
     element: {
       x: 50,
       y: 45,
-      width: 1,
-      height: 3,
+      width: this.canvas.width,
+      height: 1,
       heightDevience: 2,
     },
   };
   game = {
     spec: null,
-    speed: 50,
-    initialspeed: 50,
+    speed: 0,
+    initialspeed: 30,
     score: 0,
     highscore: 0,
     over: true,
