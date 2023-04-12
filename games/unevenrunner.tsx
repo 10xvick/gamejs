@@ -131,7 +131,7 @@ class logics {
     }
     obstacle.x -= 0.25;
     this.actions.jumpstate();
-    // this.actions.hit();
+    this.actions.hit();
     this.actions.gc();
     parser.playerwalkanim();
   }
@@ -247,7 +247,7 @@ class gameobjects {
   game = {
     spec: null,
     speed: 0,
-    initialspeed: 30,
+    initialspeed: 50,
     score: 0,
     highscore: 0,
     over: true,
