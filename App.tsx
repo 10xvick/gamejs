@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useRef } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
 import { Jumpingjack } from './games/jumpingjack';
-import { unevenrunner } from './games/unevenrunner';
+import { Jaggedrunner } from './games/jaggedrunner';
 import './style.css';
 
 export default function App() {
@@ -15,7 +15,7 @@ export default function App() {
 
 const gameclass = {
   'Jumping Jack': Jumpingjack,
-  'Uneven Runner': unevenrunner,
+  'Jagged Runner': Jaggedrunner,
 };
 
 const Games = () => {

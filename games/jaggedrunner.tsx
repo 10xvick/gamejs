@@ -1,4 +1,4 @@
-export class unevenrunner {
+export class Jaggedrunner {
   constructor(canvas) {
     new logics(new gameobjects(canvas));
   }
