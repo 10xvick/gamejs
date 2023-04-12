@@ -14,14 +14,14 @@ class logics {
         gobject.game.over = false;
         gobject.game.score = 0;
         gobject.game.speed = gobject.game.initialspeed;
+        gobject.player.x = gobject.player.initialpos.x;
+        gobject.player.y = gobject.player.initialpos.y;
         gobject.obstacle.container = Array(2)
           .fill(1)
           .map((e, i) => ({
             x: gobject.canvas.width * i,
-            y: this.actions.newHeight(),
+            y: this.gobject.player.y + this.gobject.player.height,
           })) as any;
-        gobject.player.x = gobject.player.initialpos.x;
-        gobject.player.y = gobject.player.initialpos.y;
         this.actions.updatespec(false);
         this.setupdatespeed();
       }
@@ -36,9 +36,8 @@ class logics {
 
   setupdatespeed() {
     this.interval && clearInterval(this.interval);
-    const newinterval =
-      1000 / (this.gobject.game.speed + this.gobject.game.score);
-    this.interval = setInterval(() => this.update(this.gobject), newinterval);
+    const newtime = 1000 / (this.gobject.game.speed + this.gobject.game.score);
+    this.interval = setInterval(() => this.update(this.gobject), newtime);
   }
 
   frameupdate() {
@@ -51,11 +50,15 @@ class logics {
   actions = {
     jump: () => {
       const { player, obstacle } = this.gobject;
-      
-      if (true) {
-        player.y = obstacle.container[1].y - player.height;
-        obstacle.container[0].y = obstacle.container[1].y;
+      const diff = player.y + player.height - obstacle.container[1].y;
+      if (diff == 0) {
+        this.actions.updatespec(true);
+        console.log('jump');
+        return;
       }
+      const diffclammped = Math.abs(diff) / diff;
+      player.y -= diffclammped * player.actions.jump.step;
+      obstacle.container[0].y -= diffclammped * player.actions.jump.step;
     },
     jumpstate: () => {
       const { player, canvas } = this.gobject;
@@ -80,22 +83,15 @@ class logics {
     },
     hit: () => {
       const { player, obstacle } = this.gobject;
-      const xplayer = player.x + player.pixels.length;
-      const yplayer = player.y + player.pixels[0].length;
-      if (
-        obstacle.container.some(
-          (e) =>
-            e.x <= xplayer &&
-            e.x + e.width >= player.x &&
-            e.y + e.height >= player.y &&
-            e.y <= yplayer
-        )
-      ) {
+      const xplayer = player.x + player.width;
+      const yplayer = player.y + player.height;
+      const obs = obstacle.container[1];
+      if (obs.x <= xplayer && obs.y != yplayer) {
         this.actions.updatespec(true);
       }
     },
     gc: () => {
-      const { obstacle, canvas } = this.gobject;
+      const { obstacle, canvas, game } = this.gobject;
       obstacle.container.forEach((o, i) => {
         if (o.x < -1 * canvas.width) {
           const selection = obstacle.container.shift();
@@ -103,6 +99,7 @@ class logics {
           selection.y = this.actions.newHeight();
           this.gobject.obstacle.container.push(selection);
           this.actions.updatespec(false);
+          game.score += 1;
           this.setupdatespeed();
         } else o.x -= 0.5;
       });
@@ -172,7 +169,7 @@ class gameobjects {
     this.player.height = this.player.pixels.length;
     this.player.initialpos = {
       x: this.canvas.width / 2 - this.player.width * 1.5,
-      y: this.canvas.height - this.player.height,
+      y: this.canvas.height - this.player.height - 4,
     };
   }
 
@@ -207,7 +204,7 @@ class gameobjects {
     HUD: null,
   };
   player = {
-    initialpos: { x: 10, y: 40 },
+    initialpos: { x: 10, y: 30 },
     x: 10,
     y: 40,
     width: 1,

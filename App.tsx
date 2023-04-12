@@ -19,7 +19,7 @@ const gameclass = {
 };
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[1]);
+  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[2]);
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
@@ -79,7 +79,6 @@ const Games = () => {
 };
 
 function run(canvas, HUD, game) {
-  console.log(gameclass, game);
   new gameclass[game]({
     element: canvas,
     context: canvas.getContext('2d'),
