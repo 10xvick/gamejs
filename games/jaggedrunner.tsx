@@ -53,7 +53,6 @@ class logics {
       const diff = player.y + player.height - obstacle.container[1].y;
       if (diff == 0) {
         this.actions.updatespec(true);
-        console.log('jump');
         return;
       }
       const diffclammped = Math.abs(diff) / diff;
