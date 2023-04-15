@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
 import { Jumpingjack } from './games/jumpingjack';
 import { Jaggedrunner } from './games/jaggedrunner';
+import { Plumbertower } from './games/plumbertower';
 import './style.css';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
 const gameclass = {
   'Jumping Jack': Jumpingjack,
   'Jagged Runner': Jaggedrunner,
+  'Plumber Tower': Plumbertower,
 };
 
 const Games = () => {
@@ -79,6 +81,7 @@ const Games = () => {
 };
 
 function run(canvas, HUD, game) {
+  canvas.width = canvas.height = 50;
   new gameclass[game]({
     element: canvas,
     context: canvas.getContext('2d'),
