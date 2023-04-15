@@ -28,21 +28,23 @@ function gameloop(render, update_, gobj) {
 function update(gobj: typeof gameobject) {
   const { floor } = gobj;
   // floor.scale += 0.01;
-  floor.x += 1;
-
-  floor.container.forEach((e) => {
-    e.x = floor.x + e.x;
-  });
+  floor.x += 0.1;
 }
 
 function render(gobj: typeof gameobject) {
-  const {
-    canvas: { context },
-    floor,
-  } = gobj;
+  const { canvas, floor } = gobj;
+
+  const { context, element } = canvas;
+
+  context.clearRect(0, 0, element.width, element.height);
 
   floor.container.forEach((e) => {
-    context.fillRect(e.x, e.y, e.width, e.height);
+    context.fillRect(
+      floor.x + e.x,
+      floor.y + e.y,
+      e.width + floor.scale,
+      e.height + floor.scale
+    );
   });
 }
 

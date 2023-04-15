@@ -47,8 +47,8 @@ const Games = () => {
         <div className="flex flex-1 flex-col">
           <canvas
             ref={canvas}
-            className="bg-gray-600 w-100"
-            style={{ imageRendering: 'pixelated' }}
+            className="bg-gray-600 w-auto h-auto"
+            style={{ imageRendering: 'pixelated', maxHeight: '100%' }}
           />
           <div ref={HUD} className="bg-green-800 text-center">
             {' '}
