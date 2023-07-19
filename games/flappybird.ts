@@ -1,4 +1,4 @@
-export function test(canvas) {
+export function Flappybird(canvas) {
   new logics(gameobjects(canvas));
 }
 
@@ -86,7 +86,7 @@ class logics {
       const { obstacle, canvas, game } = this.gobject;
       const random = this.utility.randomrange;
       obstacle.container.pop();
-      const passway_h = (canvas.height * random(3, 6)) / 8;
+      const passway_h = (canvas.height * random(3, 5)) / 8;
 
       const pipe = {
         x: random(70, 50),

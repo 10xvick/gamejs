@@ -6,6 +6,7 @@ import { Jaggedrunner } from './games/jaggedrunner';
 import { Plumbertower } from './games/plumbertower';
 import './style.css';
 import { test } from './games/exp';
+import { Flappybird } from './games/flappybird';
 
 export default function App() {
   return (
@@ -16,7 +17,8 @@ export default function App() {
 }
 
 const gameclass = {
-  'test Jack': test,
+  test: test,
+  'Flappy Bird': Flappybird,
   'Jumping Jack': Jumpingjack,
   'Jagged Runner': Jaggedrunner,
   'Plumber Tower': Plumbertower,
