@@ -76,7 +76,7 @@ class logics {
             e.y <= yplayer
         )
       ) {
-        this.actions.updatespec(true);
+        //this.actions.updatespec(true);
       }
     },
     gc: () => {
@@ -90,10 +90,10 @@ class logics {
     destroyandcreatenew: () => {
       const { obstacle, canvas, game } = this.gobject;
       obstacle.container.pop();
-      const height = this.utility.randomrange(10, 4);
+      const height = canvas.height || this.utility.randomrange(10, 4);
       const obs = {
         x: this.utility.randomrange(70, 50),
-        width: this.utility.randomrange(6, 1),
+        width: obstacle.element.width || this.utility.randomrange(6, 1),
         height: height,
         y: canvas.height - height,
       };
@@ -134,7 +134,7 @@ class logics {
 
   render({ canvas, obstacle }) {
     canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-    this.animations.forEach((e) => e);
+    this.animations.forEach((e) => e());
 
     obstacle.container.forEach((e) =>
       canvas.context.fillRect(e.x, e.y, e.width, e.height)
@@ -178,7 +178,7 @@ function gameobjects(canvas: {
       },
     },
     obstacle: {
-      container: [{ x: 50, y: 45, width: 10, height: 5 }],
+      container: [{ x: 50, y: 45, width: 10, height: canvas.height }],
       element: {
         x: 50,
         y: 45,
