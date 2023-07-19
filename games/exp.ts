@@ -47,7 +47,7 @@ class logics {
   actions = {
     jump: () => {
       const { player } = this.gobject;
-      if (player.actions.jump.done) {
+      if (true || player.actions.jump.done) {
         player.actions.jump.done = false;
         player.actions.jump.y = -50;
       }
@@ -90,14 +90,18 @@ class logics {
     destroyandcreatenew: () => {
       const { obstacle, canvas, game } = this.gobject;
       obstacle.container.pop();
-      const height = canvas.height || this.utility.randomrange(10, 4);
-      const obs = {
+      const passway_h = (canvas.height * 6) / this.utility.randomrange(2, 4);
+      const passway_y =
+        (canvas.height - passway_h) / this.utility.randomrange(1, 2);
+
+      const pipe_top = {
         x: this.utility.randomrange(70, 50),
-        width: obstacle.element.width || this.utility.randomrange(6, 1),
-        height: height,
-        y: canvas.height - height,
+        width: obstacle.element.width,
+        height: canvas.height - passway_h - passway_y / 2,
+        y: 0,
       };
-      obstacle.container.push(obs);
+      const pipe_bottom = {};
+      obstacle.container.push(pipe_top);
       game.score += 1;
       this.actions.updatespec(false);
       this.setupdatespeed();
