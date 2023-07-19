@@ -25,7 +25,7 @@ const gameclass = {
 };
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[0]);
+  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[1]);
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
