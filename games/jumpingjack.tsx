@@ -1,24 +1,22 @@
-export class Jumpingjack {
-  constructor(canvas) {
-    new logics(new gameobjects(canvas));
-  }
+export function Jumpingjack(canvas) {
+  new logics(gameobjects(canvas));
 }
 
 class logics {
   interval = null;
-  constructor(private gobject: gameobjects) {
+  animations = [];
+  constructor(private gobject) {
     this.frameupdate();
     const inputAction = () => {
-      if (!gobject.game.over) this.actions.jump();
+      const { game, obstacle, player } = gobject;
+      if (!game.over) this.actions.jump();
       else {
-        gobject.game.over = false;
-        gobject.game.score = 0;
-        gobject.game.speed = gobject.game.initialspeed;
-        gobject.obstacle.container = [
-          Object.assign({}, gobject.obstacle.element),
-        ];
-        gobject.player.x = gobject.player.initialpos.x;
-        gobject.player.y = gobject.player.initialpos.y;
+        game.over = false;
+        game.score = 0;
+        game.speed = game.initialspeed;
+        obstacle.container = [Object.assign({}, obstacle.element)];
+        player.x = player.initialpos.x;
+        player.y = player.initialpos.y;
         this.actions.updatespec(false);
         this.setupdatespeed();
       }
@@ -29,6 +27,7 @@ class logics {
         inputAction();
       })
     );
+    this.animations = animationgenerator(gobject);
   }
 
   setupdatespeed() {
@@ -40,7 +39,7 @@ class logics {
 
   frameupdate() {
     requestAnimationFrame(() => this.frameupdate());
-    if (this.gobject.canvas.context) {
+    if (this.gobject.canvas.context && !this.gobject.game.over) {
       this.render(this.gobject);
     }
   }
@@ -58,16 +57,16 @@ class logics {
       if (!player.actions.jump.done) {
         player.y += player.actions.jump.y / 100;
         player.actions.jump.y++;
-        if (player.y >= canvas.height - player.pixels.length) {
-          player.y = canvas.height - player.pixels.length;
+        if (player.y >= canvas.height - player.height) {
+          player.y = canvas.height - player.height;
           player.actions.jump.done = true;
         }
       }
     },
     hit: () => {
       const { player, obstacle } = this.gobject;
-      const xplayer = player.x + player.pixels.length;
-      const yplayer = player.y + player.pixels[0].length;
+      const xplayer = player.x + player.height;
+      const yplayer = player.y + player.width;
       if (
         obstacle.container.some(
           (e) =>
@@ -89,28 +88,29 @@ class logics {
       });
     },
     destroyandcreatenew: () => {
-      this.gobject.obstacle.container.pop();
+      const { obstacle, canvas, game } = this.gobject;
+      obstacle.container.pop();
       const height = this.utility.randomrange(10, 4);
       const obs = {
         x: this.utility.randomrange(70, 50),
         width: this.utility.randomrange(6, 1),
         height: height,
-        y: this.gobject.canvas.height - height,
+        y: canvas.height - height,
       };
-      this.gobject.obstacle.container.push(obs);
-      this.gobject.game.score += 1;
+      obstacle.container.push(obs);
+      game.score += 1;
       this.actions.updatespec(false);
       this.setupdatespeed();
     },
     updatespec: (gameover) => {
+      const { game, canvas } = this.gobject;
       if (gameover) {
-        this.gobject.game.over = true;
-        this.gobject.canvas.HUD.innerText = `GAME-OVER | score:${this.gobject.game.score} | highscore:${this.gobject.game.highscore}`;
+        game.over = true;
+        canvas.HUD.innerText = `GAME-OVER | score:${game.score} | highscore:${game.highscore}`;
         return;
       }
-      this.gobject.game.score > this.gobject.game.highscore &&
-        (this.gobject.game.highscore = this.gobject.game.score);
-      this.gobject.canvas.HUD.innerText = `score:${this.gobject.game.score} | highscore:${this.gobject.game.highscore}`;
+      game.score > game.highscore && (game.highscore = game.score);
+      canvas.HUD.innerText = `score:${game.score} | highscore:${game.highscore}`;
     },
   };
 
@@ -121,7 +121,7 @@ class logics {
   };
 
   count = 0;
-  update({ obstacle, parser }) {
+  update({ obstacle }) {
     if (this.gobject.game.over) return;
     if (this.count < 10) {
       this.count++;
@@ -130,121 +130,107 @@ class logics {
     this.actions.jumpstate();
     this.actions.hit();
     this.actions.gc();
-    parser.playerwalkanim();
   }
 
-  render({ canvas, player, obstacle }: gameobjects) {
+  render({ canvas, obstacle }) {
     canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-    const drawplayer = (player) => {
-      player.pixels.forEach((rows, i) => {
-        rows.forEach((pixel, j) => {
-          pixel && canvas.context.fillRect(player.x + j, player.y + i, 1, 1);
-        });
-      });
-    };
-    drawplayer(player);
-    obstacle.container.forEach((e) =>
+    this.animations.forEach((e) => e());
+    [...obstacle.container].forEach((e) =>
       canvas.context.fillRect(e.x, e.y, e.width, e.height)
     );
   }
 }
 
-class gameobjects {
-  constructor(canvas: {
-    element: any;
-    context: CanvasRenderingContext2D;
-    width: number;
-    height: number;
-    HUD: HTMLElement;
-  }) {
-    this.canvas = { ...this.canvas, ...canvas };
-    [canvas.element.width, canvas.element.height] = [
-      this.canvas.width,
-      this.canvas.height,
-    ];
-    this.player.width = this.player.pixels[0].length;
-    this.player.height = this.player.pixels.length;
-    this.player.initialpos = {
-      x: this.canvas.width / 2 - this.player.width * 1.5,
-      y: this.canvas.height - this.player.height,
-    };
-  }
-
-  firstframe = 0;
-
-  parser = {
-    playerwalkanim: () => {
-      const pix = this.player.pixels;
-      const height = this.player.pixels.length;
-      if (this.firstframe > 10) {
-        this.firstframe = 0;
-      }
-      this.firstframe++;
-
-      if (this.firstframe < 5) {
-        pix[height - 2] = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0];
-        pix[height - 1] = [0, 1, 1, 0, 0, 0, 0, 1, 1, 0];
-      } else {
-        pix[height - 2] = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
-        pix[height - 1] = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0];
-      }
+function gameobjects(canvas: {
+  element: any;
+  context: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  HUD: HTMLElement;
+}) {
+  return {
+    firstframe: 0,
+    canvas: {
+      element: canvas,
+      context: canvas.context,
+      x: 0,
+      y: 0,
+      width: canvas.width,
+      height: canvas.height,
+      HUD: canvas.HUD,
     },
-  };
-
-  canvas = {
-    element: null,
-    context: null,
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    HUD: null,
-  };
-  player = {
-    initialpos: { x: 10, y: 40 },
-    x: 10,
-    y: 40,
-    width: 1,
-    height: 1,
-    pixels: [
-      [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-    ],
-    actions: {
-      jump: {
-        limit: 15,
-        speed: 1,
-        y: 0,
-        limitreched: false,
-        done: true,
+    player: {
+      initialpos: { x: canvas.width / 5, y: canvas.height - 11 },
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 11,
+      actions: {
+        jump: {
+          limit: 15,
+          speed: 1,
+          y: 0,
+          limitreched: false,
+          done: true,
+        },
+        damage: {},
       },
-      damage: {},
+    },
+    obstacle: {
+      container: [{ x: 50, y: 45, width: 10, height: 5 }],
+      element: {
+        x: 50,
+        y: 45,
+        width: 5,
+        height: 5,
+      },
+    },
+    game: {
+      spec: null,
+      speed: 50,
+      initialspeed: 50,
+      score: 0,
+      highscore: 0,
+      over: true,
     },
   };
-  obstacle = {
-    container: [{ x: 50, y: 45, width: 10, height: 5 }],
-    element: {
-      x: 50,
-      y: 45,
-      width: 5,
-      height: 5,
+}
+
+function animationgenerator({ canvas, player, firstframe }) {
+  return [
+    () => {
+      const pixels = [
+        [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 0, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      ];
+      const height = pixels.length;
+      if (firstframe > 10) {
+        firstframe = 0;
+      }
+      firstframe++;
+
+      if (firstframe < 5) {
+        pixels[height - 2] = [0, 1, 0, 0, 0, 0, 0, 1, 0, 0];
+        pixels[height - 1] = [0, 1, 1, 0, 0, 0, 0, 1, 1, 0];
+      } else {
+        pixels[height - 2] = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0];
+        pixels[height - 1] = [0, 0, 1, 1, 0, 0, 1, 1, 0, 0];
+      }
+
+      pixels.forEach((rows, i) => {
+        rows.forEach((pixel, j) => {
+          pixel && canvas.context.fillRect(player.x + j, player.y + i, 1, 1);
+        });
+      });
     },
-  };
-  game = {
-    spec: null,
-    speed: 50,
-    initialspeed: 50,
-    score: 0,
-    highscore: 0,
-    over: true,
-  };
+  ];
 }
