@@ -90,14 +90,15 @@ class logics {
     destroyandcreatenew: () => {
       const { obstacle, canvas, game } = this.gobject;
       obstacle.container.pop();
-      const passway_h = (canvas.height * 6) / this.utility.randomrange(2, 4);
+      const passway_h =
+        (canvas.height * 4 || this.utility.randomrange(4, 6)) / 8;
       const passway_y =
         (canvas.height - passway_h) / this.utility.randomrange(1, 2);
 
       const pipe_top = {
         x: this.utility.randomrange(70, 50),
         width: obstacle.element.width,
-        height: canvas.height - passway_h - passway_y / 2,
+        height: canvas.height - passway_h,
         y: 0,
       };
       const pipe_bottom = {};
