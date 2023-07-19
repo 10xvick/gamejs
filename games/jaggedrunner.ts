@@ -35,9 +35,14 @@ class logics {
   }
 
   setupdatespeed() {
+    const { game } = this.gobject;
     this.interval && clearInterval(this.interval);
-    const newtime = 1000 / (this.gobject.game.speed + this.gobject.game.score);
-    this.interval = setInterval(() => this.update(this.gobject), newtime);
+    const speedfactor = 1 + Math.pow(2, game.score / 100);
+
+    this.interval = setInterval(
+      () => this.update(this.gobject),
+      speedfactor * game.speed
+    );
   }
 
   frameupdate() {
@@ -245,8 +250,8 @@ class gameobjects {
   };
   game = {
     spec: null,
-    speed: 0,
-    initialspeed: 50,
+    speed: 7,
+    initialspeed: 7,
     score: 0,
     highscore: 0,
     over: true,

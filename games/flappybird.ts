@@ -210,7 +210,7 @@ function animationgenerator({ canvas, player, firstframe }) {
     () => {
       const pixels = [
         [0, 0, 0, 0, 0, 0],
-        [0, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 0],
         [1, 1, 1, 0, 1, 1],
         [1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 0],
@@ -222,9 +222,9 @@ function animationgenerator({ canvas, player, firstframe }) {
       firstframe++;
 
       if (firstframe < 5) {
-        pixels[0] = [0, 0, 0, 0, 0, 0];
+        pixels[0] = [1, 1, 0, 0, 0, 0];
       } else {
-        pixels[0] = [1, 1, 1, 0, 0, 0];
+        pixels[0] = [0, 0, 0, 0, 0, 0];
       }
 
       pixels.forEach((rows, i) => {
