@@ -1,4 +1,4 @@
-export function Flappybird(canvas) {
+export function test(canvas) {
   new logics(gameobjects(canvas));
 }
 
