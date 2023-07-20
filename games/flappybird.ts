@@ -89,7 +89,6 @@ class logics {
 
     destroyandcreatenew: (n = 1) => {
       const { obstacle, game } = this.gobject;
-      console.log(obstacle.container.length);
       obstacle.container.shift();
       for (let i = 0; i < n; i++)
         obstacle.container.push(this.generator.pipe(this.gobject));
