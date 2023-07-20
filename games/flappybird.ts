@@ -35,7 +35,7 @@ class logics {
   setupdatespeed() {
     const { game } = this.gobject;
     this.interval && clearInterval(this.interval);
-    const speedfactor = 1 + Math.pow(2, game.score / 100);
+    const speedfactor = 1 + Math.pow(2, -game.score / 100);
 
     this.interval = setInterval(
       () => this.update(this.gobject),
