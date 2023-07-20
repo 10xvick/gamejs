@@ -1,3 +1,5 @@
+import { events, helper } from '../utility/utility';
+
 export function test(canvas) {
   new logics(gameobjects(canvas));
 }
@@ -8,27 +10,25 @@ class logics {
   constructor(private gobject) {
     this.frameupdate();
     const inputAction = () => {
-      const { game, player } = gobject;
+      const { game, player, obstacle } = gobject;
       if (!game.over) this.actions.jump();
       else {
         game.over = false;
         game.score = 0;
         game.speed = game.initialspeed;
-        this.actions.destroyandcreatenew();
+        obstacle.container = [];
+        this.actions.destroyandcreatenew(2);
         player.x = player.initialpos.x;
         player.y = player.initialpos.y;
         player.actions.jump.y = 0;
         player.actions.jump.done = false;
         this.actions.updatespec(false);
         this.setupdatespeed();
+        return;
       }
     };
 
-    ['keydown', 'click'].forEach((eventType) =>
-      document.addEventListener(eventType, (e) => {
-        inputAction();
-      })
-    );
+    events.any(inputAction);
     this.animations = animationgenerator(gobject);
   }
 
@@ -86,24 +86,18 @@ class logics {
         } else o.x -= 0.5;
       });
     },
-    destroyandcreatenew: () => {
-      const { obstacle, canvas, game } = this.gobject;
-      const random = this.utility.randomrange;
-      obstacle.container.pop();
-      const passway_h = (canvas.height * random(3, 5)) / 8;
 
-      const pipe = {
-        x: random(70, 50),
-        width: obstacle.element.width,
-        y: ((canvas.height - passway_h) * random(1, 5)) / 5,
-        height: passway_h,
-      };
-
-      obstacle.container.push(pipe);
+    destroyandcreatenew: (n = 1) => {
+      const { obstacle, game } = this.gobject;
+      console.log(obstacle.container.length);
+      obstacle.container.shift();
+      for (let i = 0; i < n; i++)
+        obstacle.container.push(this.generator.pipe(this.gobject));
       game.score += 1;
       this.actions.updatespec(false);
       this.setupdatespeed();
     },
+
     updatespec: (gameover) => {
       const { game, canvas } = this.gobject;
       if (gameover) {
@@ -116,9 +110,20 @@ class logics {
     },
   };
 
-  utility = {
-    randomrange: function (max, min) {
-      return Math.floor(Math.random() * (max - min) + min);
+  generator = {
+    pipe: function ({ obstacle, canvas }, dist = 0) {
+      const random = helper.randomrange;
+      const passway_h = (canvas.height * random(3, 5)) / 8;
+      const distance =
+        canvas.width * obstacle.interval + obstacle.container[0]?.x ||
+        canvas.width;
+
+      return {
+        x: distance,
+        width: obstacle.element.width,
+        y: ((canvas.height - passway_h) * random(1, 5)) / 5,
+        height: passway_h,
+      };
     },
   };
 
@@ -193,6 +198,7 @@ function gameobjects(canvas: {
         width: 5,
         height: 5,
       },
+      interval: 4 / 5,
     },
     game: {
       spec: null,
@@ -210,7 +216,7 @@ function animationgenerator({ canvas, player, firstframe }) {
     () => {
       const pixels = [
         [0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 1, 1, 0],
         [1, 1, 1, 0, 1, 1],
         [1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 0],
