@@ -209,7 +209,7 @@ function animationgenerator({ canvas, player }) {
   let firstframe = 0;
 
   return [
-    () => {
+    function () {
       const pixels = [
         [0, 0, 0, 0, 0, 0],
         [0, 1, 1, 1, 1, 0],
@@ -226,6 +226,7 @@ function animationgenerator({ canvas, player }) {
       if (firstframe < 5) {
         pixels[0] = [1, 1, 0, 0, 0, 0];
       } else {
+        console.log('x');
         pixels[0] = [0, 0, 0, 0, 0, 0];
       }
 
