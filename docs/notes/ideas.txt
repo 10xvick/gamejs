@@ -4,3 +4,4 @@ doodle jump varient yyy:
 -user have to click when the ring is at the very bottom.
 -at the time of click the more is the higher is the ring the lower is the score
 -as the score goes higher speed increases
+-at the moment of click ring changes direction and starts going upwards and then falls back again just like flappy bird game.
