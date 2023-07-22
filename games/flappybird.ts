@@ -140,7 +140,7 @@ class logics {
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
 
-        obstacle.container?.forEach((e) => {
+        obstacle.container.forEach((e) => {
           canvas.context.fillRect(e.x, 0, e.width, e.y);
           canvas.context.fillRect(
             e.x,

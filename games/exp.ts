@@ -51,7 +51,7 @@ class logics {
       const { obstacle } = this.gobject;
       obstacle.container.forEach((o) => {
         if (o.x < -o.width) {
-          this.actions.destroyandcreatenew();
+          this.actions.destroyandcreatenew(0);
         } else o.x -= 0.5;
       });
     },
