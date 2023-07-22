@@ -8,27 +8,14 @@ class logics {
   interval = null;
 
   constructor(private gobject) {
-    const inputAction = () => {
-      const { game, player, obstacle } = gobject;
-      if (!game.over) this.actions.jump();
-      else {
-        game.over = false;
-        game.score = 0;
-        game.speed = game.initialspeed;
-        obstacle.container = [];
-        this.actions.destroyandcreatenew(2);
-        player.x = player.initialpos.x;
-        player.y = player.initialpos.y;
-        player.actions.jump.y = 0;
-        player.actions.jump.done = false;
-        this.actions.updatespec(false);
-        return;
-      }
-    };
-    events.any(inputAction);
+    events.any(() => this.events.input.inputAction(gobject, this.actions));
 
-    this.lifecycle.update(gobject);
-    this.lifecycle.render(gobject, animationgenerator(gobject));
+    // this.events.lifecycle.update(gobject, this.actions);
+
+    const animations = animationgenerator(gobject);
+    events.lifecycle.render(() =>
+      this.events.lifecycle.onrender(gobject, animations)
+    );
   }
 
   actions = {
@@ -78,7 +65,7 @@ class logics {
         obstacle.container.push(this.generator.pipe(this.gobject));
       game.score += 1;
       this.actions.updatespec(false);
-      this.lifecycle.update(this.gobject);
+      this.events.lifecycle.update(this.gobject, this.actions);
     },
 
     updatespec: (gameover) => {
@@ -110,46 +97,61 @@ class logics {
     },
   };
 
-  lifecycle = {
-    update: (gobject) => {
-      events.lifecycle.update(
-        () => this.lifecycle.onupdate(gobject, this.actions),
-        (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
-      );
-    },
-    render: (gobject, animations) => {
-      events.lifecycle.render(() =>
-        this.lifecycle.onrender(gobject, animations)
-      );
-    },
-
-    count: 0,
-    onupdate: function ({ obstacle, game }, actions) {
-      if (game.over) return;
-      if (this.count < 10) {
-        this.count++;
-      }
-
-      obstacle.x -= 0.25;
-      actions.jumpstate();
-      actions.hit();
-      actions.gc();
+  events = {
+    input: {
+      inputAction: function ({ game, player, obstacle }, actions) {
+        if (!game.over) actions.jump();
+        else {
+          game.over = false;
+          game.score = 0;
+          game.speed = game.initialspeed;
+          obstacle.container = [];
+          actions.destroyandcreatenew(2);
+          player.x = player.initialpos.x;
+          player.y = player.initialpos.y;
+          player.actions.jump.y = 0;
+          player.actions.jump.done = false;
+          actions.updatespec(false);
+        }
+      },
     },
 
-    onrender: ({ canvas, obstacle, game }, animations) => {
-      if (game.over) return;
-      canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-      animations.forEach((e) => e());
-
-      obstacle.container?.forEach((e) => {
-        canvas.context.fillRect(e.x, 0, e.width, e.y);
-        canvas.context.fillRect(
-          e.x,
-          e.y + e.height,
-          e.width,
-          canvas.height - e.y - e.height
+    lifecycle: {
+      update: function (gobject, actions) {
+        events.lifecycle.update(
+          () => this.onupdate(gobject, actions),
+          (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
         );
-      });
+      },
+
+      count: 0,
+      onupdate: function ({ obstacle, game }, actions) {
+        if (game.over) return;
+        if (this.count < 10) {
+          this.count++;
+        }
+
+        obstacle.x -= 0.25;
+        actions.jumpstate();
+        actions.hit();
+        actions.gc();
+      },
+
+      onrender: ({ canvas, obstacle, game }, animations) => {
+        if (game.over) return;
+        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+        animations.forEach((e) => e());
+
+        obstacle.container?.forEach((e) => {
+          canvas.context.fillRect(e.x, 0, e.width, e.y);
+          canvas.context.fillRect(
+            e.x,
+            e.y + e.height,
+            e.width,
+            canvas.height - e.y - e.height
+          );
+        });
+      },
     },
   };
 }
