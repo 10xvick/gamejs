@@ -15,6 +15,19 @@ export const events = {
       })
     );
   },
+
+  lifecycle: {
+    interval: null,
+    update: function (fn, timestamp) {
+      this.interval && clearInterval(this.interval);
+      this.interval = setInterval(fn, timestamp);
+    },
+
+    render: function (fn) {
+      requestAnimationFrame(() => this.render(fn));
+      fn();
+    },
+  },
 };
 
 export const helper = {
