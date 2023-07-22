@@ -24,8 +24,8 @@ export const events = {
     },
 
     render: function (fn) {
-      requestAnimationFrame(() => this.render(fn));
       fn();
+      requestAnimationFrame(() => this.render(fn));
     },
   },
 };

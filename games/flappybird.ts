@@ -28,7 +28,9 @@ class logics {
     events.any(inputAction);
 
     this.lifecycle.update(gobject);
-    this.lifecycle.render(gobject, animationgenerator(gobject));
+    events.lifecycle.render(() =>
+      this.lifecycle.onrender(gobject, animationgenerator(gobject))
+    );
   }
 
   actions = {
@@ -117,9 +119,6 @@ class logics {
         (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
       );
     },
-    render: (gobject, animations) => {
-      events.lifecycle.render(() => this.onrender(gobject, animations));
-    },
 
     count: 0,
     onupdate: function ({ obstacle, game }, actions) {
@@ -138,7 +137,7 @@ class logics {
       canvas.context.clearRect(0, 0, canvas.width, canvas.height);
       animations.forEach((e) => e());
 
-      obstacle.container?.forEach((e) => {
+      obstacle.container.forEach((e) => {
         canvas.context.fillRect(e.x, 0, e.width, e.y);
         canvas.context.fillRect(
           e.x,
@@ -159,7 +158,6 @@ function gameobjects(canvas: {
   HUD: HTMLElement;
 }) {
   return {
-    firstframe: 0,
     canvas: {
       element: canvas,
       context: canvas.context,
@@ -207,7 +205,9 @@ function gameobjects(canvas: {
   };
 }
 
-function animationgenerator({ canvas, player, firstframe }) {
+function animationgenerator({ canvas, player }) {
+  let firstframe = 0;
+
   return [
     () => {
       const pixels = [
@@ -217,7 +217,7 @@ function animationgenerator({ canvas, player, firstframe }) {
         [1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 0],
       ];
-      const height = pixels.length;
+
       if (firstframe > 10) {
         firstframe = 0;
       }
