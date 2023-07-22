@@ -10,8 +10,6 @@ class logics {
   constructor(private gobject) {
     events.any(() => this.events.input.inputAction(gobject, this.actions));
 
-    // this.events.lifecycle.update(gobject, this.actions);
-
     const animations = animationgenerator(gobject);
     events.lifecycle.render(() =>
       this.events.lifecycle.onrender(gobject, animations)
