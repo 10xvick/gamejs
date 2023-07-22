@@ -28,9 +28,7 @@ class logics {
     events.any(inputAction);
 
     this.lifecycle.update(gobject);
-    events.lifecycle.render(() =>
-      this.lifecycle.onrender(gobject, animationgenerator(gobject))
-    );
+    this.lifecycle.render(gobject, animationgenerator(gobject));
   }
 
   actions = {
@@ -119,6 +117,11 @@ class logics {
         (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
       );
     },
+    render: (gobject, animations) => {
+      events.lifecycle.render(() =>
+        this.lifecycle.onrender(gobject, animations)
+      );
+    },
 
     count: 0,
     onupdate: function ({ obstacle, game }, actions) {
@@ -133,11 +136,12 @@ class logics {
       actions.gc();
     },
 
-    onrender: ({ canvas, obstacle }, animations) => {
+    onrender: ({ canvas, obstacle, game }, animations) => {
+      if (game.over) return;
       canvas.context.clearRect(0, 0, canvas.width, canvas.height);
       animations.forEach((e) => e());
 
-      obstacle.container.forEach((e) => {
+      obstacle.container?.forEach((e) => {
         canvas.context.fillRect(e.x, 0, e.width, e.y);
         canvas.context.fillRect(
           e.x,
@@ -158,6 +162,7 @@ function gameobjects(canvas: {
   HUD: HTMLElement;
 }) {
   return {
+    firstframe: 0,
     canvas: {
       element: canvas,
       context: canvas.context,
@@ -205,11 +210,9 @@ function gameobjects(canvas: {
   };
 }
 
-function animationgenerator({ canvas, player }) {
-  let firstframe = 0;
-
+function animationgenerator({ canvas, player, firstframe }) {
   return [
-    function () {
+    () => {
       const pixels = [
         [0, 0, 0, 0, 0, 0],
         [0, 1, 1, 1, 1, 0],
@@ -217,7 +220,7 @@ function animationgenerator({ canvas, player }) {
         [1, 1, 1, 1, 1, 0],
         [0, 1, 1, 1, 1, 0],
       ];
-
+      const height = pixels.length;
       if (firstframe > 10) {
         firstframe = 0;
       }
@@ -226,7 +229,6 @@ function animationgenerator({ canvas, player }) {
       if (firstframe < 5) {
         pixels[0] = [1, 1, 0, 0, 0, 0];
       } else {
-        console.log('x');
         pixels[0] = [0, 0, 0, 0, 0, 0];
       }
 
