@@ -6,48 +6,14 @@ export function test(canvas) {
 
 class logics {
   interval = null;
-  animations = [];
+
   constructor(private gobject) {
-    this.frameupdate();
-    const inputAction = () => {
-      const { game, player, obstacle } = gobject;
-      if (!game.over) this.actions.jump();
-      else {
-        game.over = false;
-        game.score = 0;
-        game.speed = game.initialspeed;
-        obstacle.container = [];
-        this.actions.destroyandcreatenew(2);
-        player.x = player.initialpos.x;
-        player.y = player.initialpos.y;
-        player.actions.jump.y = 0;
-        player.actions.jump.done = false;
-        this.actions.updatespec(false);
-        this.setupdatespeed();
-        return;
-      }
-    };
+    events.any(() => this.events.input.inputAction(gobject, this.actions));
 
-    events.any(inputAction);
-    this.animations = animationgenerator(gobject);
-  }
-
-  setupdatespeed() {
-    const { game } = this.gobject;
-    this.interval && clearInterval(this.interval);
-    const speedfactor = 1 + Math.pow(2, -game.score / 100);
-
-    this.interval = setInterval(
-      () => this.update(this.gobject),
-      speedfactor * game.speed
+    const animations = animationgenerator(gobject);
+    events.lifecycle.render(() =>
+      this.events.lifecycle.onrender(gobject, animations)
     );
-  }
-
-  frameupdate() {
-    requestAnimationFrame(() => this.frameupdate());
-    if (this.gobject.canvas.context && !this.gobject.game.over) {
-      this.render(this.gobject);
-    }
   }
 
   actions = {
@@ -56,6 +22,7 @@ class logics {
       player.actions.jump.done = false;
       player.actions.jump.y = -50;
     },
+
     jumpstate: () => {
       const { player } = this.gobject;
       if (!player.actions.jump.done) {
@@ -63,6 +30,7 @@ class logics {
         player.actions.jump.y++;
       }
     },
+
     hit: () => {
       const { canvas, player, obstacle } = this.gobject;
       const xplayer = player.x + player.height;
@@ -75,9 +43,10 @@ class logics {
             (e.y >= player.y || e.y + e.height <= player.y + player.height)
         )
       ) {
-        this.actions.updatespec(true);
+        //this.actions.updatespec(true);
       }
     },
+
     gc: () => {
       const { obstacle } = this.gobject;
       obstacle.container.forEach((o) => {
@@ -89,13 +58,12 @@ class logics {
 
     destroyandcreatenew: (n = 1) => {
       const { obstacle, game } = this.gobject;
-      console.log(obstacle.container.length);
       obstacle.container.shift();
       for (let i = 0; i < n; i++)
         obstacle.container.push(this.generator.pipe(this.gobject));
       game.score += 1;
       this.actions.updatespec(false);
-      this.setupdatespeed();
+      this.events.lifecycle.update(this.gobject, this.actions);
     },
 
     updatespec: (gameover) => {
@@ -111,7 +79,7 @@ class logics {
   };
 
   generator = {
-    pipe: function ({ obstacle, canvas }, dist = 0) {
+    pipe: function ({ obstacle, canvas }) {
       const random = helper.randomrange;
       const passway_h = (canvas.height * random(3, 5)) / 8;
       const distance =
@@ -127,32 +95,63 @@ class logics {
     },
   };
 
-  count = 0;
-  update({ obstacle }) {
-    if (this.gobject.game.over) return;
-    if (this.count < 10) {
-      this.count++;
-    }
-    obstacle.x -= 0.25;
-    this.actions.jumpstate();
-    this.actions.hit();
-    this.actions.gc();
-  }
+  events = {
+    input: {
+      inputAction: function ({ game, player, obstacle }, actions) {
+        if (!game.over) actions.jump();
+        else {
+          game.over = false;
+          game.score = 0;
+          game.speed = game.initialspeed;
+          obstacle.container = [];
+          actions.destroyandcreatenew(2);
+          player.x = player.initialpos.x;
+          player.y = player.initialpos.y;
+          player.actions.jump.y = 0;
+          player.actions.jump.done = false;
+          actions.updatespec(false);
+        }
+      },
+    },
 
-  render({ canvas, obstacle }) {
-    canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-    this.animations.forEach((e) => e());
+    lifecycle: {
+      update: function (gobject, actions) {
+        events.lifecycle.update(
+          () => this.onupdate(gobject, actions),
+          (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
+        );
+      },
 
-    obstacle.container.forEach((e) => {
-      canvas.context.fillRect(e.x, 0, e.width, e.y);
-      canvas.context.fillRect(
-        e.x,
-        e.y + e.height,
-        e.width,
-        canvas.height - e.y - e.height
-      );
-    });
-  }
+      count: 0,
+      onupdate: function ({ obstacle, game }, actions) {
+        if (game.over) return;
+        if (this.count < 10) {
+          this.count++;
+        }
+
+        obstacle.x -= 0.25;
+        actions.jumpstate();
+        actions.hit();
+        actions.gc();
+      },
+
+      onrender: ({ canvas, obstacle, game }, animations) => {
+        if (game.over) return;
+        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+        animations.forEach((e) => e());
+
+        obstacle.container?.forEach((e) => {
+          canvas.context.fillRect(e.x, 0, e.width, e.y);
+          canvas.context.fillRect(
+            e.x,
+            e.y + e.height,
+            e.width,
+            canvas.height - e.y - e.height
+          );
+        });
+      },
+    },
+  };
 }
 
 function gameobjects(canvas: {

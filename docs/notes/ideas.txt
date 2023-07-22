@@ -1,0 +1,6 @@
+doodle jump varient yyy: 
+-a stik and a ring on it.
+-ring goes up and down.
+-user have to click when the ring is at the very bottom.
+-at the time of click the more is the higher is the ring the lower is the score
+-as the score goes higher speed increases
