@@ -47,12 +47,12 @@ class logics {
       }
     },
 
-    gc: () => {
-      const { obstacle } = this.gobject;
+    movement: () => {
+      const { obstacle, canvas } = this.gobject;
       obstacle.container.forEach((o) => {
-        if (o.y < -o.width) {
+        if (o.y > canvas.height + o.width) {
           this.actions.destroyandcreatenew();
-        } else o.y -= 0.5;
+        } else o.y += 0.1;
       });
     },
 
@@ -83,14 +83,16 @@ class logics {
       const random = helper.randomrange;
       const passway_w = (canvas.width * random(3, 5)) / 8;
       const distance =
-        canvas.height * obstacle.interval + obstacle.container[0]?.y ||
-        canvas.height;
+        (canvas.height / 2) * obstacle.interval - obstacle.container[0]?.y ||
+        canvas.height / 2;
+
       console.log(obstacle.container.length);
+
       return {
-        x: 10,
-        width: ((canvas.width - passway_w) * random(1, 5)) / 5,
+        width: (canvas.width * 3) / 8,
+        x: ((canvas.width - passway_w) * random(1, 5)) / 5,
         y: distance,
-        height: 10,
+        height: 2,
       };
     },
   };
@@ -129,10 +131,9 @@ class logics {
           this.count++;
         }
 
-        obstacle.x -= 0.25;
         actions.jumpstate();
         actions.hit();
-        actions.gc();
+        actions.movement();
       },
 
       onrender: ({ canvas, obstacle, game }, animations) => {

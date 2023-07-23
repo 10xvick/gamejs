@@ -123,13 +123,12 @@ class logics {
       },
 
       count: 0,
-      onupdate: function ({ obstacle, game }, actions) {
+      onupdate: function ({ game }, actions) {
         if (game.over) return;
         if (this.count < 10) {
           this.count++;
         }
 
-        obstacle.x -= 0.25;
         actions.jumpstate();
         actions.hit();
         actions.gc();
