@@ -50,9 +50,9 @@ class logics {
     gc: () => {
       const { obstacle } = this.gobject;
       obstacle.container.forEach((o) => {
-        if (o.x < -o.width) {
-          this.actions.destroyandcreatenew(0);
-        } else o.x -= 0.5;
+        if (o.y < -o.width) {
+          this.actions.destroyandcreatenew();
+        } else o.y -= 0.5;
       });
     },
 
@@ -81,16 +81,16 @@ class logics {
   generator = {
     pipe: function ({ obstacle, canvas }) {
       const random = helper.randomrange;
-      const passway_h = (canvas.height * random(3, 5)) / 8;
+      const passway_w = (canvas.width * random(3, 5)) / 8;
       const distance =
-        canvas.width * obstacle.interval + obstacle.container[0]?.x ||
-        canvas.width;
-
+        canvas.height * obstacle.interval + obstacle.container[0]?.y ||
+        canvas.height;
+      console.log(obstacle.container.length);
       return {
-        x: distance,
-        width: obstacle.element.width,
-        y: ((canvas.height - passway_h) * random(1, 5)) / 5,
-        height: passway_h,
+        x: 10,
+        width: ((canvas.width - passway_w) * random(1, 5)) / 5,
+        y: distance,
+        height: 10,
       };
     },
   };
@@ -140,14 +140,8 @@ class logics {
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
 
-        obstacle.container?.forEach((e) => {
-          canvas.context.fillRect(e.x, 0, e.width, e.y);
-          canvas.context.fillRect(
-            e.x,
-            e.y + e.height,
-            e.width,
-            canvas.height - e.y - e.height
-          );
+        obstacle.container.forEach((e) => {
+          canvas.context.fillRect(e.x, e.y, e.width, e.height);
         });
       },
     },
@@ -190,7 +184,7 @@ function gameobjects(canvas: {
       },
     },
     obstacle: {
-      container: [{ x: 50, y: 45, width: 10, height: canvas.height }],
+      container: [{ x: 50, y: 45, width: 10, height: 10 }],
       element: {
         x: 50,
         y: 45,
