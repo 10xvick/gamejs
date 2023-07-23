@@ -50,7 +50,7 @@ class logics {
     movement: () => {
       const { obstacle, canvas } = this.gobject;
       obstacle.container.forEach((o) => {
-        if (o.y > canvas.height + o.width) {
+        if (o.y > canvas.height) {
           this.actions.destroyandcreatenew();
         } else o.y += 0.1;
       });
@@ -83,13 +83,10 @@ class logics {
       const random = helper.randomrange;
       const passway_w = (canvas.width * random(3, 5)) / 8;
       const distance =
-        (canvas.height / 2) * obstacle.interval - obstacle.container[0]?.y ||
-        canvas.height / 2;
-
-      console.log(obstacle.container.length);
+        (obstacle.container.at(-1)?.y || 0) - canvas.height / obstacle.total;
 
       return {
-        width: (canvas.width * 3) / 8,
+        width: passway_w,
         x: ((canvas.width - passway_w) * random(1, 5)) / 5,
         y: distance,
         height: 2,
@@ -106,7 +103,7 @@ class logics {
           game.score = 0;
           game.speed = game.initialspeed;
           obstacle.container = [];
-          actions.destroyandcreatenew(2);
+          actions.destroyandcreatenew(obstacle.total);
           player.x = player.initialpos.x;
           player.y = player.initialpos.y;
           player.actions.jump.y = 0;
@@ -125,7 +122,7 @@ class logics {
       },
 
       count: 0,
-      onupdate: function ({ obstacle, game }, actions) {
+      onupdate: function ({ game }, actions) {
         if (game.over) return;
         if (this.count < 10) {
           this.count++;
@@ -192,7 +189,7 @@ function gameobjects(canvas: {
         width: 5,
         height: 5,
       },
-      interval: 4 / 5,
+      total: 4,
     },
     game: {
       spec: null,
