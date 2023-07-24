@@ -18,30 +18,47 @@ class logics {
 
   actions = {
     jump: () => {
-      const { player } = this.gobject;
-      player.actions.jump.done = false;
-      player.actions.jump.y = -50;
+      const { jump } = this.gobject.player.actions;
+      jump.done = false;
+      jump.y = -50;
+      console.log(jump.done);
     },
 
     jumpstate: () => {
-      const { player } = this.gobject;
+      const { player, canvas, obstacle } = this.gobject;
       if (!player.actions.jump.done) {
-        player.y += player.actions.jump.y / 100;
-        player.actions.jump.y++;
+        player.y += player.actions.jump.y / 300;
+        const playery = player.y + player.height;
+
+        if (playery > player.base.y) {
+          player.actions.jump.y = 0;
+          player.actions.jump.done = true;
+
+          if (playery > player.base.y + canvas.height / obstacle.total) {
+            player.base = obstacle.container[++player.baseIndex];
+          }
+        } else player.actions.jump.y++;
+      } else {
+        player.y = player.base.y - player.height;
       }
     },
 
     hit: () => {
       const { canvas, player, obstacle } = this.gobject;
       const xplayer = player.x + player.height;
+
+      let last = obstacle.container[1];
+      const last2 = obstacle.container[2];
+
+      const playery = player.y + player.height;
       if (
-        player.y + player.height > canvas.height ||
-        obstacle.container.some(
-          (e) =>
-            e.x <= xplayer &&
-            e.x + e.width >= player.x &&
-            (e.y >= player.y || e.y + e.height <= player.y + player.height)
-        )
+        playery > last.y
+        //|| obstacle.container.some(
+        //   (e) =>
+        //     e.x <= xplayer &&
+        //     e.x + e.width >= player.x &&
+        //     (e.y >= player.y || e.y + e.height <= playery)
+        // )
       ) {
         //this.actions.updatespec(true);
       }
@@ -52,13 +69,15 @@ class logics {
       obstacle.container.forEach((o) => {
         if (o.y > canvas.height) {
           this.actions.destroyandcreatenew();
-        } else o.y += 0.1;
+        } else o.y += 0.05;
       });
     },
 
     destroyandcreatenew: (n = 1) => {
-      const { obstacle, game } = this.gobject;
+      const { obstacle, game, player } = this.gobject;
       obstacle.container.shift();
+      player.baseIndex && player.baseIndex--;
+
       for (let i = 0; i < n; i++)
         obstacle.container.push(this.generator.pipe(this.gobject));
       game.score += 1;
@@ -74,7 +93,7 @@ class logics {
         return;
       }
       game.score > game.highscore && (game.highscore = game.score);
-      canvas.HUD.innerText = `score:${game.score} | highscore:${game.highscore}`;
+      canvas.HUD.innerText = `score:${game.score} | highscore:${game.highscore} afjwe ${this.gobject.player.actions.jump.done}`;
     },
   };
 
@@ -86,8 +105,8 @@ class logics {
         (obstacle.container.at(-1)?.y || 0) - canvas.height / obstacle.total;
 
       return {
-        width: passway_w,
-        x: ((canvas.width - passway_w) * random(1, 5)) / 5,
+        width: 50 || passway_w,
+        x: 0, //((canvas.width - passway_w) * random(1, 5)) / 5,
         y: distance,
         height: 2,
       };
@@ -105,7 +124,7 @@ class logics {
           obstacle.container = [];
           actions.destroyandcreatenew(obstacle.total);
           player.x = player.initialpos.x;
-          player.y = player.initialpos.y;
+          player.base = obstacle.container[0];
           player.actions.jump.y = 0;
           player.actions.jump.done = false;
           actions.updatespec(false);
@@ -170,6 +189,8 @@ function gameobjects(canvas: {
       y: 0,
       width: 6,
       height: 5,
+      base: { y: 0 },
+      baseIndex: 0,
       actions: {
         jump: {
           limit: 15,
