@@ -1,4 +1,4 @@
-import { events, helper } from '../utility/utility';
+import { events } from '../utility/utility';
 
 export function Jumper(canvas) {
   new logics(gameobjects(canvas));
@@ -8,7 +8,13 @@ class logics {
   interval = null;
 
   constructor(private gobject) {
-    events.any(() => this.events.input.inputAction(gobject, this.actions));
+    events.any(() =>
+      this.events.input.inputAction(
+        gobject,
+        this.actions,
+        this.events.lifecycle
+      )
+    );
 
     const animations = animationgenerator(gobject);
     events.lifecycle.render(() =>
@@ -18,44 +24,28 @@ class logics {
 
   actions = {
     jump: () => {
-      const { player, canvas } = this.gobject;
+      const { player, canvas, game } = this.gobject;
       player.actions.jump.done = false;
       player.actions.jump.y = -canvas.height;
+      game.score += 1;
+      this.actions.updatespec(false);
     },
 
     jumpstate: () => {
       const { player } = this.gobject;
       if (!player.actions.jump.done) {
-        player.y += player.actions.jump.y / 50;
+        player.y += player.actions.jump.y / 35;
         player.actions.jump.y++;
       }
-    },
+      if (player.y <= player.actions.jump.range.top) {
+        player.actions.jump.y = 1;
+        player.y = player.actions.jump.range.top;
+      }
 
-    hit: () => {
-      const { canvas, player, obstacle } = this.gobject;
-      const xplayer = player.x + player.height;
-      if (player.y + player.height > canvas.height) {
+      if (player.y > player.actions.jump.range.bottom - player.height) {
+        player.y = player.actions.jump.range.bottom - player.height - 1;
         this.actions.updatespec(true);
       }
-    },
-
-    gc: () => {
-      const { obstacle } = this.gobject;
-      obstacle.container.forEach((o) => {
-        if (o.x < -o.width) {
-          this.actions.destroyandcreatenew();
-        } else o.x -= 0.5;
-      });
-    },
-
-    destroyandcreatenew: (n = 1) => {
-      const { obstacle, game } = this.gobject;
-      obstacle.container.shift();
-      for (let i = 0; i < n; i++)
-        obstacle.container.push(this.generator.pipe(this.gobject));
-      game.score += 1;
-      this.actions.updatespec(false);
-      this.events.lifecycle.update(this.gobject, this.actions);
     },
 
     updatespec: (gameover) => {
@@ -70,47 +60,30 @@ class logics {
     },
   };
 
-  generator = {
-    pipe: function ({ obstacle, canvas }) {
-      const random = helper.randomrange;
-      const passway_h = (canvas.height * random(3, 5)) / 8;
-      const distance =
-        canvas.width * obstacle.interval + obstacle.container[0]?.x ||
-        canvas.width;
-
-      return {
-        x: distance,
-        width: obstacle.element.width,
-        y: ((canvas.height - passway_h) * random(1, 5)) / 5,
-        height: passway_h,
-      };
-    },
-  };
-
   events = {
     input: {
-      inputAction: function ({ game, player, obstacle }, actions) {
-        if (!game.over) actions.jump();
-        else {
+      inputAction: function (gobject, actions, lifecycle) {
+        const { game, player } = gobject;
+        if (!game.over) {
+          player.y--;
+          actions.jump();
+          lifecycle.update(gobject, actions, lifecycle.onupdate);
+        } else {
           game.over = false;
           game.score = 0;
           game.speed = game.initialspeed;
-          obstacle.container = [];
-          actions.destroyandcreatenew(2);
           player.x = player.initialpos.x;
           player.y = player.initialpos.y;
           player.actions.jump.y = 0;
           player.actions.jump.done = false;
-          actions.updatespec(false);
-          actions.jump();
         }
       },
     },
 
     lifecycle: {
-      update: function (gobject, actions) {
+      update: function (gobject, actions, onupdate) {
         events.lifecycle.update(
-          () => this.onupdate(gobject, actions),
+          () => onupdate(gobject, actions),
           (1 + Math.pow(2, -gobject.game.score / 100)) * gobject.game.speed
         );
       },
@@ -118,19 +91,20 @@ class logics {
       count: 0,
       onupdate: function ({ game }, actions) {
         if (game.over) return;
-        if (this.count < 10) {
-          this.count++;
+        if (game.update.count < 10) {
+          game.update.count++;
         }
 
         actions.jumpstate();
-        actions.hit();
-        // actions.gc();
       },
 
-      onrender: ({ canvas, obstacle, game }, animations) => {
-        if (game.over) return;
+      onrender: ({ canvas, obstacle, game, player }, animations) => {
+        // if (game.over) return;
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
+
+        canvas.context.fillRect(0, player.actions.jump.range.top, 50, 1);
+        canvas.context.fillRect(0, player.actions.jump.range.bottom, 50, 1);
 
         obstacle.container.forEach((e) => {
           canvas.context.fillRect(e.x, 0, e.width, e.y);
@@ -165,7 +139,7 @@ function gameobjects(canvas: {
       HUD: canvas.HUD,
     },
     player: {
-      initialpos: { x: canvas.width / 5, y: canvas.height - 6 },
+      initialpos: { x: (canvas.width - 6) / 2, y: canvas.height - 10 - 6 },
       x: 0,
       y: 0,
       width: 6,
@@ -177,6 +151,10 @@ function gameobjects(canvas: {
           y: 0,
           limitreched: false,
           done: true,
+          range: {
+            top: 10,
+            bottom: canvas.height - 10,
+          },
         },
         damage: {},
       },
@@ -194,15 +172,17 @@ function gameobjects(canvas: {
     game: {
       spec: null,
       speed: 5,
-      initialspeed: 5,
+      initialspeed: 8,
       score: 0,
       highscore: 0,
       over: true,
+      update: { count: 0 },
     },
   };
 }
 
 function animationgenerator({ canvas, player, firstframe }) {
+  return [() => canvas.context.fillRect(player.x, player.y, 5, 5)];
   return [
     () => {
       const pixels = [
