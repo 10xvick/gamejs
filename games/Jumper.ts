@@ -65,18 +65,19 @@ class logics {
       inputAction: function (gobject, actions, lifecycle) {
         const { game, player } = gobject;
         if (!game.over) {
-          player.y--;
           actions.jump();
-          lifecycle.update(gobject, actions, lifecycle.onupdate);
-        } else {
-          game.over = false;
-          game.score = 0;
-          game.speed = game.initialspeed;
-          player.x = player.initialpos.x;
-          player.y = player.initialpos.y;
-          player.actions.jump.y = 0;
-          player.actions.jump.done = false;
+          return;
         }
+        console.log(1);
+        game.over = false;
+        game.score = 0;
+        game.speed = game.initialspeed;
+        player.x = player.initialpos.x;
+        player.y = player.initialpos.y;
+        player.actions.jump.y = 0;
+        player.actions.jump.done = false;
+        lifecycle.update(gobject, actions, lifecycle.onupdate);
+        actions.jump();
       },
     },
 
@@ -99,12 +100,17 @@ class logics {
       },
 
       onrender: ({ canvas, obstacle, game, player }, animations) => {
-        // if (game.over) return;
+        //if (game.over) return;
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
 
-        canvas.context.fillRect(0, player.actions.jump.range.top, 50, 1);
-        canvas.context.fillRect(0, player.actions.jump.range.bottom, 50, 1);
+        canvas.context.fillRect(0, 0, 50, player.actions.jump.range.top);
+        canvas.context.fillRect(
+          0,
+          player.actions.jump.range.bottom,
+          50,
+          player.actions.jump.range.bottom
+        );
 
         obstacle.container.forEach((e) => {
           canvas.context.fillRect(e.x, 0, e.width, e.y);
@@ -152,8 +158,8 @@ function gameobjects(canvas: {
           limitreched: false,
           done: true,
           range: {
-            top: 10,
-            bottom: canvas.height - 10,
+            top: 4,
+            bottom: canvas.height - 4,
           },
         },
         damage: {},
