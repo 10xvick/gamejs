@@ -32,7 +32,7 @@ class logics {
 
         for (let i = obstacle.container.length - 1; i > -1; i--) {
           const obst = obstacle.container[i];
-          if (playery < obst.y) {
+          if (playery < obst.y && player.base.y > obst.y) {
             player.base = obst;
             break;
           }
@@ -80,7 +80,6 @@ class logics {
     destroyandcreatenew: (n = 1) => {
       const { obstacle, game, player } = this.gobject;
       obstacle.container.shift();
-      player.baseIndex && player.baseIndex--;
 
       for (let i = 0; i < n; i++)
         obstacle.container.push(this.generator.pipe(this.gobject));
@@ -109,9 +108,9 @@ class logics {
         (obstacle.container.at(-1)?.y || 0) - canvas.height / obstacle.total;
 
       return {
-        width: 50 || passway_w,
         x: 0, //((canvas.width - passway_w) * random(1, 5)) / 5,
         y: distance,
+        width: 50 || passway_w,
         height: 2,
       };
     },
@@ -127,8 +126,8 @@ class logics {
           game.speed = game.initialspeed;
           obstacle.container = [];
           actions.destroyandcreatenew(obstacle.total);
-          player.x = player.initialpos.x;
           player.base = obstacle.container[0];
+          player.x = player.initialpos.x;
           player.actions.jump.y = 0;
           player.actions.jump.done = false;
           actions.updatespec(false);
@@ -156,13 +155,15 @@ class logics {
         actions.movement();
       },
 
-      onrender: ({ canvas, obstacle, game }, animations) => {
+      onrender: ({ canvas, obstacle, game, player }, animations) => {
         if (game.over) return;
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
 
+        canvas.context.fillRect(0, player.base.y, 1, 5);
+
         obstacle.container.forEach((e) => {
-          canvas.context.fillRect(e.x, e.y, e.width, e.height);
+          canvas.context.fillRect(...Object.values(e));
         });
       },
     },

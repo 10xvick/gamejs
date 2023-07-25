@@ -18,8 +18,8 @@ export default function App() {
 }
 
 const gameclass = {
-  Jumper: Jumper,
   test: test,
+  Jumper: Jumper,
   'Flappy Bird': Flappybird,
   'Jumping Jack': Jumpingjack,
   'Jagged Runner': Jaggedrunner,
