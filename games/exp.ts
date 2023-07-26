@@ -20,8 +20,7 @@ class logics {
     jump: () => {
       const { jump } = this.gobject.player.actions;
       jump.done = false;
-      jump.y = -50;
-      console.log(jump.done);
+      jump.y = -45;
     },
 
     jumpstate: () => {
@@ -32,15 +31,21 @@ class logics {
 
         for (let i = obstacle.container.length - 1; i > -1; i--) {
           const obst = obstacle.container[i];
-          if (playery < obst.y && player.base.y > obst.y) {
+          if (
+            playery < obst.y &&
+            player.base.y > obst.y &&
+            player.x > obst.x &&
+            player.x < obst.x + obst.width
+          ) {
             player.base = obst;
             break;
           }
         }
 
-        if (playery > player.base.y) {
+        if (playery >= player.base.y) {
           player.actions.jump.y = 0;
           player.actions.jump.done = true;
+          player.distance = player.x - player.base.x;
         } else player.actions.jump.y++;
       } else {
         player.y = player.base.y - player.height;
@@ -66,7 +71,7 @@ class logics {
         }
       });
 
-      player.x = player.base.x + player.base.distance;
+      if (player.actions.jump.done) player.x = player.base.x + player.distance;
     },
 
     destroyandcreatenew: (n = 1) => {
@@ -182,11 +187,12 @@ function gameobjects(canvas: {
     },
     player: {
       initialpos: { x: canvas.width / 2, y: (canvas.height - 5) / 2 },
+      distance: 0,
       x: 0,
       y: 0,
       width: 6,
       height: 5,
-      base: { y: 0, x: 0, distance: 0 },
+      base: { y: 0, x: 0 },
       baseIndex: 0,
       actions: {
         jump: {
