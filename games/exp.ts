@@ -47,34 +47,26 @@ class logics {
       }
     },
 
-    hit: () => {
-      const { canvas, player, obstacle } = this.gobject;
-      const xplayer = player.x + player.height;
-
-      let last = obstacle.container[1];
-      const last2 = obstacle.container[2];
-
-      const playery = player.y + player.height;
-      if (
-        playery > last.y
-        //|| obstacle.container.some(
-        //   (e) =>
-        //     e.x <= xplayer &&
-        //     e.x + e.width >= player.x &&
-        //     (e.y >= player.y || e.y + e.height <= playery)
-        // )
-      ) {
-        //this.actions.updatespec(true);
-      }
-    },
-
     movement: () => {
-      const { obstacle, canvas } = this.gobject;
+      const { obstacle, canvas, player } = this.gobject;
       obstacle.container.forEach((o) => {
         if (o.y > canvas.height) {
           this.actions.destroyandcreatenew();
         } else o.y += 0.05;
+
+        const moveby = 0.1;
+        if (o.dir) {
+          if (o.x <= 0) {
+            o.dir = !o.dir;
+          } else o.x -= moveby;
+        } else {
+          if (o.x >= canvas.width - o.width) {
+            o.dir = !o.dir;
+          } else o.x += moveby;
+        }
       });
+
+      player.x = player.base.x + player.base.distance;
     },
 
     destroyandcreatenew: (n = 1) => {
@@ -108,10 +100,11 @@ class logics {
         (obstacle.container.at(-1)?.y || 0) - canvas.height / obstacle.total;
 
       return {
-        x: 0, //((canvas.width - passway_w) * random(1, 5)) / 5,
+        x: (canvas.width - passway_w) / 2,
         y: distance,
-        width: 50 || passway_w,
+        width: passway_w,
         height: 2,
+        dir: helper.randomrange(1, 0),
       };
     },
   };
@@ -151,7 +144,6 @@ class logics {
         }
 
         actions.jumpstate();
-        actions.hit();
         actions.movement();
       },
 
@@ -189,12 +181,12 @@ function gameobjects(canvas: {
       HUD: canvas.HUD,
     },
     player: {
-      initialpos: { x: canvas.width / 5, y: (canvas.height - 5) / 2 },
+      initialpos: { x: canvas.width / 2, y: (canvas.height - 5) / 2 },
       x: 0,
       y: 0,
       width: 6,
       height: 5,
-      base: { y: 0 },
+      base: { y: 0, x: 0, distance: 0 },
       baseIndex: 0,
       actions: {
         jump: {
