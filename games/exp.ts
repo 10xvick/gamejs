@@ -64,11 +64,11 @@ class logics {
         if (o.dir) {
           if (o.x <= 0) {
             o.dir = !o.dir;
-          } else moveby = -0.1;
+          } else moveby = -o.speed / 10;
         } else {
           if (o.x >= canvas.width - o.width) {
             o.dir = !o.dir;
-          } else moveby = 0.1;
+          } else moveby = o.speed / 10;
         }
         o.x += moveby;
         if (o == player.base && player.actions.jump.done) player.x += moveby;
@@ -105,18 +105,22 @@ class logics {
 
   generator = {
     floor: function ({ obstacle, canvas }) {
-      const random = helper.randomrange;
-      const passway_w = (canvas.width * random(1, 3)) / 8;
+      const passway_w = (canvas.width * helper.randomrange(4, 2)) / 8;
       const distance =
         (obstacle.container.at(-1)?.y || canvas.height) -
         canvas.height / obstacle.total;
-
+      console.log(
+        Array(100)
+          .fill(0)
+          .map((e) => helper.randomrange(3, 0))
+      );
       return {
         x: (canvas.width - passway_w) / 2,
         y: distance,
         width: passway_w,
         height: 2,
-        dir: helper.randomrange(1, 0),
+        dir: helper.randomrange(3, 0),
+        speed: helper.randomrange(3, 0),
       };
     },
   };
