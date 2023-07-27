@@ -20,16 +20,16 @@ export default function App() {
 
 const gameclass = {
   test: test,
+  'test-2': Jumper,
+  'test-3': Plumbertower,
   'Doodle Jump': Doodlejump,
-  Jumper: Jumper,
   'Flappy Bird': Flappybird,
   'Jumping Jack': Jumpingjack,
   'Jagged Runner': Jaggedrunner,
-  'Plumber Tower': Plumbertower,
 };
 
 const Games = () => {
-  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[0]);
+  const [selectedGame, setSelectedGame] = useState(Object.keys(gameclass)[-10]);
   const canvas = useRef();
   const HUD = useRef();
   const handleGameClick = (game) => {
