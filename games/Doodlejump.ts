@@ -95,25 +95,20 @@ class logics {
       const { game, canvas } = this.gobject;
       if (gameover) {
         game.over = true;
-        canvas.HUD.innerText = `GAME-OVER | score:${game.score} | highscore:${game.highscore}`;
+        canvas.HUD.innerText = `GAME-OVER |  score:${game.score}  |  highscore:${game.highscore}`;
         return;
       }
       game.score > game.highscore && (game.highscore = game.score);
-      canvas.HUD.innerText = `score:${game.score} | highscore:${game.highscore} afjwe ${this.gobject.player.actions.jump.done}`;
+      canvas.HUD.innerText = `score:${game.score} | highscore:${game.highscore}`;
     },
   };
 
   generator = {
     floor: function ({ obstacle, canvas }) {
-      const passway_w = (canvas.width * helper.randomrange(4, 2)) / 8;
+      const passway_w = canvas.width / 5;
       const distance =
         (obstacle.container.at(-1)?.y || canvas.height) -
         canvas.height / obstacle.total;
-      console.log(
-        Array(100)
-          .fill(0)
-          .map((e) => helper.randomrange(3, 0))
-      );
       return {
         x: (canvas.width - passway_w) / 2,
         y: distance,
@@ -169,10 +164,8 @@ class logics {
         canvas.context.clearRect(0, 0, canvas.width, canvas.height);
         animations.forEach((e) => e());
 
-        canvas.context.fillRect(0, player.base.y, 1, 5);
-
         obstacle.container.forEach((e) => {
-          canvas.context.fillRect(...Object.values(e));
+          canvas.context.fillRect(e.x, e.y, e.width, e.height);
         });
       },
     },

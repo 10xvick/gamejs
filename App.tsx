@@ -64,10 +64,10 @@ const Games = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-wrap items-center justify-center overflow-y-auto">
+        <div className="flex-1 flex flex-wrap content-center justify-center overflow-y-auto">
           {Object.keys(gameclass).map((name) => (
             <div
-              className="bg-gray-900 m-1 p-5"
+              className="bg-gray-900 m-1 p-5 cursor-pointer"
               key={name}
               onClick={() => handleGameClick(name)}
             >
