@@ -76,9 +76,9 @@ const Games = () => {
           ))}
         </div>
       )}
-      <footer className="flex justify-between items-center h-6 bg-gray-900">
+      <footer className="flex justify-between items-center h-6 bg-gray-900 px-4">
         {selectedGame && (
-          <button className="mx-4" onClick={handleBackClick}>
+          <button onClick={handleBackClick}>
             <IoIosArrowBack size={24} />
           </button>
         )}
